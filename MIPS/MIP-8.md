@@ -170,20 +170,27 @@ else:
 
 ### SSTORE Gas Schedule
 
-We define the `SSTORE` cost as the sum of an I/O write cost and a state transition cost, both computed per `SSTORE`. As in legacy `SSTORE`, we apply the `LOAD_COST` if the page is cold.
+The `SSTORE` cost can be stratified in terms of I/O cost and state transitions costs. The I/O cost is defined on the level of page granularity, while the state transition cost is defined in terms of `SSTORE` granularity with respect to a page. However, the I/O remains aware of whether that data acted upon is cold or hot. 
+
+Finally, as in legacy `SSTORE`, we apply the `LOAD_COST` to a page to check the initial value. 
 
 ### Write Cost
 
-Let `P0` be the initial value of page `p` for a given `SSTORE`, and let `P1` be the terminal value of page `p` immediately after the `SSTORE`.
+Let `P0` be the initial value of page `p` for a given `SSTORE`, and let `P1` be the terminal value of page `p` immediately after the `SSTORE`. Apriori the write cost, a load cost is applied to obtain the initial value `P0` of the page. 
 
-The following is the I/O cost for writing the page to the hardware.
-
+The following is the I/O cost for the writing the page to the hardware.  
 
 ```python
 # PAGE I/O Cost
 
+
 # `BASE_COST` is deducted in all cases.
 gas_deducted += BASE_COST
+
+# `LOAD_COST` is deducted to obtain initial state P0 from DB
+if p not in read_accessed_pages: 
+    gas_deducted += LOAD_COST
+    read_accessed_pages.append(p)
 
 # Page did not change for this SSTORE
 if P0 == P1:
@@ -201,11 +208,6 @@ else:
 
         # Page has been charged write cost
         write_accessed_pages.append(p)
-
-        # Page has not been loaded to cache
-        if p not in read_accessed_pages:
-            gas_deducted += LOAD_COST
-            read_accessed_pages.append(p)
 
         # instantiate state growth counters
         current_state_growth[p] = 0
