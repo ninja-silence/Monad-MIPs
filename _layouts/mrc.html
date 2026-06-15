@@ -15,11 +15,11 @@ layout: default
   {% endif %}
 {% endif %}
 
-<p><a href="{{ '/' | relative_url }}" data-prefetch-on-hover="true">← All MIPs</a></p>
+<p><a href="{{ '/' | relative_url }}#mrcs" data-prefetch-on-hover="true">← All MRCs</a></p>
 <h1>
-  MIP-{{ page.mip }}: {{ page.title | escape }}
+  MRC-{{ page.mrc }}: {{ page.title | escape }}
   <span class="title-icons">
-    {% if discussions_safe != "" %}<a class="icon-link" href="{{ discussions_safe | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Open discussion for this MIP">💬</a>{% endif %}<a class="icon-link" href="{{ source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Open MIP source file on GitHub">🔗</a>
+    {% if discussions_safe != "" %}<a class="icon-link" href="{{ discussions_safe | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Open discussion for this MRC">💬</a>{% endif %}<a class="icon-link" href="{{ source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Open MRC source file on GitHub">🔗</a>
   </span>
 </h1>
 
@@ -47,9 +47,9 @@ layout: default
 <p>Please cite this document as:</p>
 <p>
   <span class="author-value">{{ page.author | default: "-" | escape }}</span>,
-  "MIP-{{ page.mip }}: {{ page.title | escape }},"
+  "MRC-{{ page.mrc }}: {{ page.title | escape }},"
   <em>Monad Improvement Proposals</em>,
-  no. {{ page.mip }},
+  no. {{ page.mrc }},
   {{ page.created | date: "%B %Y" }}.
   [Online serial].
   Available:
