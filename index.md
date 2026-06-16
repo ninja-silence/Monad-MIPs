@@ -5,8 +5,10 @@ title: MIPs
 
 # Monad Improvement Proposals
 
-{% assign mips = site.pages | where_exp: "p", "p.mip" | sort: "mip" %}
-{% assign mrcs = site.pages | where_exp: "p", "p.mrc" | sort: "mrc" %}
+{% comment %} An MRC is a MIP with category "MRC" (see MIP-1); both use the same
+   "mip" number field in the preamble. Split the two collections by category. {% endcomment %}
+{% assign mips = site.pages | where_exp: "p", "p.mip and p.category != 'MRC'" | sort: "mip" %}
+{% assign mrcs = site.pages | where_exp: "p", "p.mip and p.category == 'MRC'" | sort: "mip" %}
 
 <div class="proposal-tabs" role="tablist" aria-label="Proposal type">
 	<button type="button" class="proposal-tab is-active" id="tab-mips" role="tab" aria-selected="true" aria-controls="panel-mips" data-panel="mips">MIPs</button>
@@ -85,7 +87,7 @@ title: MIPs
 	<tbody>
 		{% for p in mrcs %}
 			<tr>
-				<td><a href="{{ p.url | relative_url }}">{{ p.mrc | escape }}</a></td>
+				<td><a href="{{ p.url | relative_url }}">{{ p.mip | escape }}</a></td>
 				<td>{{ p.title | escape }}</td>
 				<td class="author-value">{{ p.author | default: "-" | escape }}</td>
 				<td>{{ p.type | default: "-" | escape }}</td>
@@ -201,6 +203,21 @@ title: MIPs
 	.proposal-table tr.is-hidden {
 		display: none;
 	}
+	/* Use fixed layout with explicit column widths so a long Author string
+	   (multiple authors with emails) can't stretch its column excessively on
+	   wide viewports. max-width on cells is unreliable under auto layout. */
+	.proposal-table {
+		table-layout: fixed;
+	}
+	.proposal-table th,
+	.proposal-table td {
+		box-sizing: border-box;
+	}
+	.proposal-table th:nth-child(1), .proposal-table td:nth-child(1) { width: 7%; }   /* Number */
+	.proposal-table th:nth-child(2), .proposal-table td:nth-child(2) { width: 38%; }  /* Title  */
+	.proposal-table th:nth-child(3), .proposal-table td:nth-child(3) { width: 25%; overflow-wrap: anywhere; }  /* Author */
+	.proposal-table th:nth-child(4), .proposal-table td:nth-child(4) { width: 15%; }  /* Type   */
+	.proposal-table th:nth-child(5), .proposal-table td:nth-child(5) { width: 15%; }  /* Status */
 	.proposal-table mark {
 		background: #fef3c7;
 		color: inherit;
@@ -220,7 +237,8 @@ title: MIPs
 		white-space: nowrap;
 	}
 	.status-pill--draft { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-	.status-pill--review, .status-pill--last-call { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+	.status-pill--review { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+	.status-pill--last-call { background: #ede9fe; border-color: #ddd6fe; color: #5b21b6; }
 	.status-pill--final, .status-pill--living { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
 	.status-pill--stagnant, .status-pill--withdrawn { background: #f3f4f6; border-color: #e5e7eb; color: #4b5563; }
 	.panel-label { margin-top: 1.5rem; }
