@@ -5,8 +5,6 @@ title: MIPs
 
 # Monad Improvement Proposals
 
-{% comment %} An MRC is a MIP with category "MRC" (see MIP-1); both use the same
-   "mip" number field in the preamble. Split the two collections by category. {% endcomment %}
 {% assign mips = site.pages | where_exp: "p", "p.mip and p.category != 'MRC'" | sort: "mip" %}
 {% assign mrcs = site.pages | where_exp: "p", "p.mip and p.category == 'MRC'" | sort: "mip" %}
 
@@ -15,18 +13,21 @@ title: MIPs
 	<button type="button" class="proposal-tab" id="tab-mrcs" role="tab" aria-selected="false" aria-controls="panel-mrcs" data-panel="mrcs" tabindex="-1">MRCs</button>
 </div>
 
-<section class="proposal-panel" id="panel-mips" role="tabpanel" aria-labelledby="tab-mips" data-collection="MIPs">
-<h2 class="panel-label" hidden>MIPs</h2>
-{% if mips.size > 0 %}
+{% if mips.size > 0 or mrcs.size > 0 %}
 <div class="mip-search" role="search">
 	<svg class="mip-search__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
 		<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.5 3a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Zm10.5 18-5.4-5.4"/>
 	</svg>
-	<input class="mip-search__input" type="search" autocomplete="off" spellcheck="false" placeholder="Search MIPs by number, title, author, or type…" aria-label="Search MIPs" />
+	<input class="mip-search__input" type="search" autocomplete="off" spellcheck="false" placeholder="Search MIPs and MRCs by number, title, author, or type…" aria-label="Search MIPs and MRCs" />
+	<kbd class="mip-search__hint" aria-hidden="true">/</kbd>
 	<button type="button" class="mip-search__clear" aria-label="Clear search" hidden>&times;</button>
 </div>
 <p class="mip-search__status muted" aria-live="polite" hidden></p>
+{% endif %}
 
+<section class="proposal-panel" id="panel-mips" role="tabpanel" aria-labelledby="tab-mips" data-collection="MIPs">
+<h2 class="panel-label" hidden>MIPs</h2>
+{% if mips.size > 0 %}
 <table class="proposal-table">
 	<thead>
 		<tr>
@@ -43,7 +44,7 @@ title: MIPs
 				<td><a href="{{ p.url | relative_url }}">{{ p.mip | escape }}</a></td>
 				<td>{{ p.title | escape }}</td>
 				<td class="author-value">{{ p.author | default: "-" | escape }}</td>
-				<td>{{ p.type | default: "-" | escape }}</td>
+				<td>{% if p.type and p.type != "" %}<span class="type-pill type-pill--{{ p.type | slugify }}">{{ p.type | escape }}</span>{% else %}<span class="muted">-</span>{% endif %}</td>
 				<td>
 					{% if p.status and p.status != "" %}
 						{% assign status_slug = p.status | slugify %}
@@ -65,15 +66,6 @@ title: MIPs
 <section class="proposal-panel" id="panel-mrcs" role="tabpanel" aria-labelledby="tab-mrcs" data-collection="MRCs" hidden>
 <h2 class="panel-label" hidden>MRCs</h2>
 {% if mrcs.size > 0 %}
-<div class="mip-search" role="search">
-	<svg class="mip-search__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-		<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.5 3a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Zm10.5 18-5.4-5.4"/>
-	</svg>
-	<input class="mip-search__input" type="search" autocomplete="off" spellcheck="false" placeholder="Search MRCs by number, title, author, or type…" aria-label="Search MRCs" />
-	<button type="button" class="mip-search__clear" aria-label="Clear search" hidden>&times;</button>
-</div>
-<p class="mip-search__status muted" aria-live="polite" hidden></p>
-
 <table class="proposal-table">
 	<thead>
 		<tr>
@@ -90,7 +82,7 @@ title: MIPs
 				<td><a href="{{ p.url | relative_url }}">{{ p.mip | escape }}</a></td>
 				<td>{{ p.title | escape }}</td>
 				<td class="author-value">{{ p.author | default: "-" | escape }}</td>
-				<td>{{ p.type | default: "-" | escape }}</td>
+				<td>{% if p.type and p.type != "" %}<span class="type-pill type-pill--{{ p.type | slugify }}">{{ p.type | escape }}</span>{% else %}<span class="muted">-</span>{% endif %}</td>
 				<td>
 					{% if p.status and p.status != "" %}
 						{% assign status_slug = p.status | slugify %}
@@ -196,6 +188,25 @@ title: MIPs
 		color: var(--text);
 		background: var(--bg-soft);
 	}
+	.mip-search__hint {
+		flex-shrink: 0;
+		margin-right: 0.6rem;
+		padding: 0.05rem 0.45rem;
+		font-family: inherit;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		color: var(--muted);
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		box-shadow: 0 1px 0 rgba(17, 24, 39, 0.05);
+		pointer-events: none;
+	}
+	/* The hint only advertises the shortcut; hide it once the box is in use. */
+	.mip-search:focus-within .mip-search__hint,
+	.mip-search.is-active .mip-search__hint {
+		display: none;
+	}
 	.mip-search__status {
 		margin: 0.25rem 0.15rem 0;
 		font-size: 0.875rem;
@@ -203,44 +214,37 @@ title: MIPs
 	.proposal-table tr.is-hidden {
 		display: none;
 	}
-	/* Use fixed layout with explicit column widths so a long Author string
-	   (multiple authors with emails) can't stretch its column excessively on
-	   wide viewports. max-width on cells is unreliable under auto layout. */
-	.proposal-table {
-		table-layout: fixed;
+	/* Always let long author strings (multiple authors with emails) wrap
+	   instead of forcing the column wide or overflowing the viewport. */
+	.proposal-table td.author-value {
+		overflow-wrap: anywhere;
 	}
-	.proposal-table th,
-	.proposal-table td {
-		box-sizing: border-box;
+	/* On wide viewports, use fixed layout with explicit column widths so a
+	   long Author string can't stretch its column excessively. max-width on
+	   cells is unreliable under auto layout. On narrow screens we keep the
+	   default auto layout so columns size to their content and stay readable. */
+	@media (min-width: 700px) {
+		.proposal-table {
+			table-layout: fixed;
+		}
+		.proposal-table th,
+		.proposal-table td {
+			box-sizing: border-box;
+		}
+		.proposal-table th:nth-child(1), .proposal-table td:nth-child(1) { width: 7%; }   /* Number */
+		.proposal-table th:nth-child(2), .proposal-table td:nth-child(2) { width: 38%; }  /* Title  */
+		.proposal-table th:nth-child(3), .proposal-table td:nth-child(3) { width: 25%; }  /* Author */
+		.proposal-table th:nth-child(4), .proposal-table td:nth-child(4) { width: 15%; }  /* Type   */
+		.proposal-table th:nth-child(5), .proposal-table td:nth-child(5) { width: 15%; }  /* Status */
 	}
-	.proposal-table th:nth-child(1), .proposal-table td:nth-child(1) { width: 7%; }   /* Number */
-	.proposal-table th:nth-child(2), .proposal-table td:nth-child(2) { width: 38%; }  /* Title  */
-	.proposal-table th:nth-child(3), .proposal-table td:nth-child(3) { width: 25%; overflow-wrap: anywhere; }  /* Author */
-	.proposal-table th:nth-child(4), .proposal-table td:nth-child(4) { width: 15%; }  /* Type   */
-	.proposal-table th:nth-child(5), .proposal-table td:nth-child(5) { width: 15%; }  /* Status */
 	.proposal-table mark {
 		background: #fef3c7;
 		color: inherit;
 		padding: 0 0.1rem;
 		border-radius: 3px;
 	}
-	.status-pill {
-		display: inline-block;
-		padding: 0.15rem 0.55rem;
-		border-radius: 999px;
-		font-size: 0.82rem;
-		font-weight: 500;
-		line-height: 1.4;
-		border: 1px solid var(--border);
-		background: var(--bg-soft);
-		color: var(--muted);
-		white-space: nowrap;
-	}
-	.status-pill--draft { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-	.status-pill--review { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
-	.status-pill--last-call { background: #ede9fe; border-color: #ddd6fe; color: #5b21b6; }
-	.status-pill--final, .status-pill--living { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
-	.status-pill--stagnant, .status-pill--withdrawn { background: #f3f4f6; border-color: #e5e7eb; color: #4b5563; }
+	/* Status & type pills and their tooltips are defined in the default layout
+	   so the MIP/MRC pages share them. */
 	.panel-label { margin-top: 1.5rem; }
 </style>
 
@@ -291,57 +295,90 @@ title: MIPs
 			});
 		}
 
-		function initSearch(panel) {
-			var input = panel.querySelector(".mip-search__input");
-			var table = panel.querySelector(".proposal-table");
-			if (!input || !table) return;
+		// A single search box filters both the MIPs and MRCs tables at once.
+		// `panels` and `activate` (declared below) are assigned before this
+		// runs; it is only invoked from the deferred init.
+		function initGlobalSearch() {
+			var input = document.querySelector(".mip-search__input");
+			if (!input) return;
 
-			var clearBtn = panel.querySelector(".mip-search__clear");
-			var status = panel.querySelector(".mip-search__status");
-			var empty = panel.querySelector(".mip-search__empty");
-			var rows = Array.prototype.slice.call(table.tBodies[0].rows);
-			var rowData = rows.map(function (row) {
-				var cells = Array.prototype.slice.call(row.cells);
+			var clearBtn = document.querySelector(".mip-search__clear");
+			var status = document.querySelector(".mip-search__status");
+			var box = input.closest(".mip-search");
+			var labels = { mips: "MIPs", mrcs: "MRCs" };
+
+			var groups = ["mips", "mrcs"].map(function (key) {
+				var panel = panels[key];
+				if (!panel) return null;
+				var table = panel.querySelector(".proposal-table");
+				if (!table || !table.tBodies[0]) return null;
+				var rows = Array.prototype.slice.call(table.tBodies[0].rows);
 				return {
-					row: row,
-					cells: cells,
-					originals: cells.map(function (cell) { return cell.innerHTML; }),
-					texts: cells.map(function (cell) { return (cell.textContent || "").toLowerCase(); })
+					key: key,
+					empty: panel.querySelector(".mip-search__empty"),
+					rowData: rows.map(function (row) {
+						var cells = Array.prototype.slice.call(row.cells);
+						return {
+							row: row,
+							cells: cells,
+							originals: cells.map(function (cell) { return cell.innerHTML; }),
+							texts: cells.map(function (cell) { return (cell.textContent || "").toLowerCase(); })
+						};
+					})
 				};
-			});
+			}).filter(Boolean);
 
 			function apply() {
 				var q = input.value.trim();
 				var ql = q.toLowerCase();
-				var visible = 0;
 				var highlightRe = q ? new RegExp("(" + escapeRegex(q) + ")", "gi") : null;
+				var counts = {};
 
-				rowData.forEach(function (d) {
-					var match = !ql || d.texts.some(function (t) { return t.indexOf(ql) !== -1; });
-					if (match) {
-						visible++;
-						d.row.classList.remove("is-hidden");
-					} else {
-						d.row.classList.add("is-hidden");
-					}
-
-					d.cells.forEach(function (cell, i) {
-						cell.innerHTML = d.originals[i];
-						if (highlightRe && match) highlightCell(cell, highlightRe);
+				groups.forEach(function (g) {
+					var visible = 0;
+					g.rowData.forEach(function (d) {
+						var match = !ql || d.texts.some(function (t) { return t.indexOf(ql) !== -1; });
+						if (match) {
+							visible++;
+							d.row.classList.remove("is-hidden");
+						} else {
+							d.row.classList.add("is-hidden");
+						}
+						d.cells.forEach(function (cell, i) {
+							cell.innerHTML = d.originals[i];
+							if (highlightRe && match) highlightCell(cell, highlightRe);
+						});
 					});
+					counts[g.key] = visible;
+					if (g.empty) g.empty.hidden = visible !== 0;
 				});
 
 				if (clearBtn) clearBtn.hidden = q.length === 0;
+				if (box) box.classList.toggle("is-active", q.length > 0);
+
+				// Dynamically switch to a tab that has matches when the active
+				// one has none, so a query is never silently hidden behind a tab.
+				if (ql) {
+					var activeKey = (panels.mrcs && !panels.mrcs.hidden) ? "mrcs" : "mips";
+					if (!counts[activeKey]) {
+						var other = activeKey === "mips" ? "mrcs" : "mips";
+						if (counts[other]) activate(other);
+					}
+				}
+
 				if (status) {
 					if (q.length === 0) {
 						status.hidden = true;
 						status.textContent = "";
 					} else {
+						var parts = [];
+						groups.forEach(function (g) {
+							if (counts[g.key]) parts.push(counts[g.key] + " in " + labels[g.key]);
+						});
 						status.hidden = false;
-						status.textContent = visible + (visible === 1 ? " match" : " matches");
+						status.textContent = parts.length ? parts.join(" · ") : "No matches";
 					}
 				}
-				if (empty) empty.hidden = visible !== 0;
 			}
 
 			input.addEventListener("input", apply);
@@ -398,14 +435,27 @@ title: MIPs
 			});
 		});
 
+		// Press "/" anywhere to jump to the search box.
+		document.addEventListener("keydown", function (e) {
+			if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+			var t = e.target;
+			var tag = t && t.tagName;
+			if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) {
+				return;
+			}
+			var input = document.querySelector(".mip-search__input");
+			if (!input) return;
+			e.preventDefault();
+			input.focus();
+		});
+
 		// Defer search init + initial activation past the default layout's
-		// @username linkification (also DOMContentLoaded), so captured row
-		// HTML includes the linkified authors.
+		// DOMContentLoaded work (@username linkification and the status/type
+		// tooltip tagging), so the row HTML captured for filtering includes the
+		// linkified authors and the tooltip attributes.
 		setTimeout(function () {
-			Object.keys(panels).forEach(function (key) {
-				if (panels[key]) initSearch(panels[key]);
-			});
 			activate(location.hash === "#mrcs" ? "mrcs" : "mips");
+			initGlobalSearch();
 		}, 0);
 	});
 </script>

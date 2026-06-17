@@ -6,7 +6,6 @@ layout: default
 {% assign source_path = page.path | replace: " ", "%20" %}
 {% assign source_url = github_repo | append: "/blob/main/" | append: source_path %}
 {% assign discussions_url = page["discussions-to"] %}
-{% comment %} Only allow http(s) discussion links — guards against javascript: and other unsafe schemes from front matter. {% endcomment %}
 {% assign discussions_safe = "" %}
 {% if discussions_url %}
   {% assign discussions_scheme = discussions_url | strip | split: ":" | first | downcase %}
@@ -19,7 +18,7 @@ layout: default
 <h1>
   MIP-{{ page.mip }}: {{ page.title | escape }}
   <span class="title-icons">
-    {% if discussions_safe != "" %}<a class="icon-link" href="{{ discussions_safe | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Open discussion for this MIP">💬</a>{% endif %}<a class="icon-link" href="{{ source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Open MIP source file on GitHub">🔗</a>
+    {% if discussions_safe != "" %}<a class="icon-link" href="{{ discussions_safe | escape }}" target="_blank" rel="noopener noreferrer" aria-label="Open discussion for this MIP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1-.9-3.8A8.38 8.38 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5Z"/></svg></a>{% endif %}<a class="icon-link" href="{{ source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Open MIP source file on GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></a>
   </span>
 </h1>
 
@@ -30,8 +29,8 @@ layout: default
 <table>
   <tbody>
     <tr><th>Author</th><td class="author-value">{{ page.author | default: "-" | escape }}</td></tr>
-    {% if page.status %}<tr><th>Status</th><td>{{ page.status | default: "-" | escape }}</td></tr>{% endif %}
-    <tr><th>Type</th><td>{{ page.type | default: "-" | escape }}</td></tr>
+    {% if page.status %}<tr><th>Status</th><td><span class="status-pill status-pill--{{ page.status | slugify }}">{{ page.status | escape }}</span></td></tr>{% endif %}
+    <tr><th>Type</th><td>{% if page.type and page.type != "" %}<span class="type-pill type-pill--{{ page.type | slugify }}">{{ page.type | escape }}</span>{% else %}-{% endif %}</td></tr>
     {% if page.category %}<tr><th>Category</th><td>{{ page.category | default: "-" | escape }}</td></tr>{% endif %}
     {% if page.created %}<tr><th>Created</th><td>{{ page.created | default: "-" | escape }}</td></tr>{% endif %}
     {% if discussions_safe != "" %}<tr><th>Discussion</th><td><a href="{{ discussions_safe | escape }}">{{ discussions_safe | escape }}</a></td></tr>{% endif %}
