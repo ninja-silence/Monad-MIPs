@@ -349,14 +349,18 @@ title: MIPs
 
 				groups.forEach(function (g) {
 					var visible = 0;
+					var even = true;
 					g.rowData.forEach(function (d) {
 						var match = !ql || d.texts.some(function (t) { return t.indexOf(ql) !== -1; });
 						if (match) {
 							visible++;
 							d.row.classList.remove("is-hidden");
+							even = !even;
 						} else {
 							d.row.classList.add("is-hidden");
 						}
+						if (even) d.row.style.backgroundColor = 'var(--bg-soft)';
+						else d.row.style.backgroundColor = '';
 						d.cells.forEach(function (cell, i) {
 							cell.innerHTML = d.originals[i];
 							if (highlightRe && match) highlightCell(cell, highlightRe);
